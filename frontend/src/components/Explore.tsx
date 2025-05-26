@@ -1,9 +1,9 @@
-import React, { useRef } from 'react';
+import { useRef } from 'react';
 
 const Explore = () => {
-    const buttonRef = useRef(null);
+    const buttonRef = useRef<HTMLButtonElement>(null);
 
-    const handleMouseMove = (e) => {
+    const handleMouseMove = (e: React.MouseEvent<HTMLButtonElement>) => {
         const button = buttonRef.current;
         if (!button) return;
 
@@ -20,20 +20,16 @@ const Explore = () => {
     };
 
     return (
-                
-                <button
-                    ref={buttonRef}
-                    className="border border-white border-opacity-50 text-white bg-black px-6 py-2 rounded-full text-lg "
-                    onMouseMove={handleMouseMove}
-                    onMouseLeave={handleMouseLeave}
-                >
-                    Contact Us
-                </button>
-                
-            
-
-
-        
+        <div className="w-full flex justify-end"> {/* ✅ aligns button to the right */}
+            <button
+                ref={buttonRef}
+                className="border border-white border-opacity-50 text-white bg-black px-6 py-2 rounded-full text-lg"
+                onMouseMove={handleMouseMove}
+                onMouseLeave={handleMouseLeave}
+            >
+                Contact Us
+            </button>
+        </div>
     );
 };
 

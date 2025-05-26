@@ -1,6 +1,6 @@
-import React from 'react';
 import Explore from '../components/Explore';
 import darkbg from '../../public/darkbg.jpg';
+import Footer from '../components/Footer';
 
 const StrideJrLanding = () => {
   return (
@@ -13,7 +13,7 @@ const StrideJrLanding = () => {
         <div className="text-white text-xl sm:text-2xl md:text-3xl font-light font-manrope">
           Stride Jr.
         </div>
-        <Explore/>
+        <Explore/>react
       </header>
 
       {/* Main Content */}
@@ -32,6 +32,7 @@ const StrideJrLanding = () => {
       <div className="absolute top-1/4 left-[10%] sm:left-1/4 w-16 h-16 sm:w-24 sm:h-24 md:w-32 md:h-32 bg-white bg-opacity-5 rounded-full blur-xl animate-pulse"></div>
       <div className="absolute bottom-1/3 right-[10%] sm:right-1/4 w-24 h-24 sm:w-36 sm:h-36 md:w-48 md:h-48 bg-yellow-300 bg-opacity-10 rounded-full blur-2xl animate-pulse" style={{animationDelay: '1s'}}></div>
       <div className="absolute top-1/2 right-[8%] sm:right-1/6 w-16 h-16 sm:w-20 sm:h-20 md:w-24 md:h-24 bg-purple-400 bg-opacity-10 rounded-full blur-lg animate-pulse" style={{animationDelay: '2s'}}></div>
+      <Footer/>
     </div>
   );
 };
