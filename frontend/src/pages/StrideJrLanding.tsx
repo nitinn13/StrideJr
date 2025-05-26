@@ -10,12 +10,11 @@ const StrideJrLanding = () => {
       
       {/* Header */}
       <header className="relative z-10 flex justify-between items-center p-4 sm:p-6 md:p-8 lg:p-12">
-        <div className="text-white text-xl sm:text-2xl md:text-3xl font-light font-manrope">
+        <div className="text-white text-xl sm:text-2xl md:text-3xl font-light font-manrope whitespace-nowrap">
           Stride Jr.
         </div>
-        <Explore/>react
+        <Explore/>
       </header>
-
       {/* Main Content */}
       <main className="relative z-10 flex flex-col items-center justify-center min-h-[70vh] px-4 sm:px-6 md:px-8 text-center mt-[-30px] sm:mt-[-40px] md:mt-[-50px]">
         <h1 className="text-xl sm:text-2xl md:text-3xl lg:text-5xl xl:text-6xl font-light text-white mb-6 sm:mb-8 leading-tight max-w-6xl font-manrope">
