@@ -4,7 +4,7 @@ import { useLocation } from 'react-router-dom'; // Import the hook
 
 const Login = () => {
   const location = useLocation();
-  const { name, link } = location.state || {}; // Access the state, with a fallback for safety
+  const { name } = location.state || {}; // Access the state, with a fallback for safety
 
   return (
     <div
