@@ -1,4 +1,3 @@
-import React from 'react';
 import darkbg from '../../public/darkbg.jpg'; // Adjust path as needed
 import Navbar from '../components/Navbar';
 import { useLocation } from 'react-router-dom'; // Import the hook

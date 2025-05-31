@@ -1,5 +1,4 @@
 import React from 'react';
-
 const Footer: React.FC = () => {
   return (
     <footer className="relative z-10 mt-auto">

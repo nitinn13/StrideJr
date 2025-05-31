@@ -1,5 +1,4 @@
 import React, { useState, useEffect } from 'react';
-import Explore from '../components/Explore';
 import darkbg from '../../public/darkbg.jpg';
 import Footer from '../components/Footer';
 import kid1 from '../../public/kid1.png';
