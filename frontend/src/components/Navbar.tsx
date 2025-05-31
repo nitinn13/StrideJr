@@ -11,7 +11,7 @@ const Navbar = () => {
           Stride Jr.
         </button>
         <div className='flex flex-row gap-3 sm:gap-3'>
-          <Explore name="Teacher " link="/teacher" />
+          <Explore name="Teacher" link="/teacher" />
           <Explore name="Parent" link="/parent" />
           
         </div>
