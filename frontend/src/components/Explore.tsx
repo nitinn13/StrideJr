@@ -1,7 +1,9 @@
 import { useRef } from 'react';
+import { useNavigate } from 'react-router-dom';
 
-const Explore = () => {
+const Explore = ({name, link}) => {
     const buttonRef = useRef<HTMLButtonElement>(null);
+    const  navigate = useNavigate();
 
     const handleMouseMove = (e: React.MouseEvent<HTMLButtonElement>) => {
         const button = buttonRef.current;
@@ -18,16 +20,26 @@ const Explore = () => {
         const button = buttonRef.current;
         if (button) button.style.transform = 'translate(0, 0)';
     };
+    const handleClick = () => {
+    navigate("/login", { state: { name, link } });
+  };
 
     return (
-        <div className="w-full flex justify-end"> {/* ✅ aligns button to the right */}
+        <div> 
             <button
+            onClick={handleClick}
+                
                 ref={buttonRef}
-                className="border border-white border-opacity-50 text-white bg-black px-6 py-2 rounded-full text-lg"
+                className="border border-white border-opacity-50 text-white bg-black 
+                          px-3 py-1.5 sm:px-4 sm:py-2 md:px-6 md:py-2 lg:px-8 lg:py-2.5 xl:px-10 xl:py-3 
+                          rounded-full 
+                          text-xs sm:text-sm md:text-base lg:text-lg xl:text-xl 
+                          transition-all duration-200 ease-in-out
+                          "
                 onMouseMove={handleMouseMove}
                 onMouseLeave={handleMouseLeave}
             >
-                Contact Us
+                {name}
             </button>
         </div>
     );
