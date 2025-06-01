@@ -8,8 +8,14 @@ dotenv.config()
 const app = express()
 const prisma = new PrismaClient()
 
+// Middleware
 app.use(express.json())
+app.use(express.urlencoded({ extended: true }))
+
+
+//Routes
 app.use('/auth', authRoutes)
+
 
 app.get('/health', async (req, res) => {
   try {
