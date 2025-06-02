@@ -1,7 +1,7 @@
 import express from 'express'
 import { PrismaClient } from '@prisma/client'
 import dotenv from 'dotenv'
-import authRoutes from './routes/auth'
+import authRoutes from './routes/auth.routes'
 
 dotenv.config()
 
