@@ -102,7 +102,7 @@ export class SuperAdminService {
     const [users, students, teachers] = await prisma.$transaction([
       prisma.user.count({ where: { schoolId } }),
       prisma.student.count({ where: { user: { schoolId } } }),
-      prisma.teacher.count({ where: { user: { schoolId, role: Role.TEACHER } } })
+      prisma.teacher.count({ where: { user: { schoolId } } })
     ])
 
     return {
