@@ -12,6 +12,7 @@ enum Role {
   ADMIN
   TEACHER
   PARENT
+  STUDENT
 }
 
 enum AttendanceStatus {
@@ -48,6 +49,9 @@ model School {
   id       String   @id @default(uuid())
   name     String
   address  String
+  email   String @unique
+  phone    String @unique
+  website  String?
 
   users    User[]
   classes  SchoolClass[]
