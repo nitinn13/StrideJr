@@ -14,7 +14,9 @@ import {
   createAnnouncementSchema,
   createExamSchema,
   createSubstituteSchema,
-  deleteSubstituteSchema
+  deleteSubstituteSchema,
+  createTeacherSchema,
+  deleteTeacherSchema
 } from '../schemas/admin.schema'
 import { catchAsync } from '../middleware/errorhandling.middleware'
 
@@ -159,6 +161,30 @@ router.delete(
   validate(deleteSubstituteSchema),
   catchAsync(async (req: Request, res: Response, next: NextFunction) => {
     res.status(501).json({ message: 'Not implemented yet' })
+  })
+)
+
+// Teachers
+router.post(
+  '/:schoolId/teachers',
+  roleMiddleware.schoolAdmin,
+  validate(createTeacherSchema),
+  catchAsync(async (req: Request, res: Response, next: NextFunction) => {
+    const { schoolId } = req.params
+    const teacherData = req.body
+    const teacher = await adminService.createTeacher(schoolId, teacherData)
+    res.status(201).json(teacher)
+  })
+)
+
+router.delete(
+  '/:schoolId/teachers/:teacherId',
+  roleMiddleware.schoolAdmin,
+  validate(deleteTeacherSchema),
+  catchAsync(async (req: Request, res: Response, next: NextFunction) => {
+    const { schoolId, teacherId } = req.params
+    await adminService.deleteTeacher(schoolId, teacherId)
+    res.status(204).send()
   })
 )
 

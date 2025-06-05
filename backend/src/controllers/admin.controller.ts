@@ -63,3 +63,15 @@ export const createExam = catchAsync(async (req: Request, res: Response) => {
   const exams = await adminService.createExam(schoolId, req.body);
   res.status(201).json(exams);
 });
+
+export const createTeacher = catchAsync(async (req: Request, res: Response) => {
+  const { schoolId } = req.params;
+  const teacher = await adminService.createTeacher(schoolId, req.body);
+  res.status(201).json(teacher);
+});
+
+export const deleteTeacher = catchAsync(async (req: Request, res: Response) => {
+  const { schoolId, teacherId } = req.params;
+  await adminService.deleteTeacher(schoolId, teacherId);
+  res.status(204).send();
+});

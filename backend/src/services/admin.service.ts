@@ -77,6 +77,87 @@ export class AdminService {
     await prisma.user.delete({ where: { id: student.userId } });
   }
 
+  async createTeacher(schoolId: string, data: { name: string; email: string }) {
+    const { name, email } = data;
+
+    // Check for existing teacher
+    const existingTeacher = await prisma.user.findFirst({
+      where: { email, role: Role.TEACHER, schoolId }
+    });
+
+    if (existingTeacher) throw new Error('Teacher already exists');
+
+    const password = await hash('defaultpassword', 10);
+
+    // Use transaction to ensure both records are created
+    const result = await prisma.$transaction(async (tx) => {
+      // 1. Create user
+      const user = await tx.user.create({
+        data: {
+          name,
+          email,
+          password,
+          role: Role.TEACHER,
+          schoolId
+        }
+      });
+
+      // 2. Create teacher record
+      const teacher = await tx.teacher.create({
+        data: {
+          userId: user.id
+        }
+      });
+
+      // 3. Return complete teacher data
+      return await tx.user.findUnique({
+        where: { id: user.id },
+        include: {
+          teacher: true
+        }
+      });
+    });
+
+    return result;
+  }
+  async deleteTeacher(schoolId: string, teacherId: string) {
+    // Use transaction to ensure both records are deleted
+    return await prisma.$transaction(async (tx) => {
+      // 1. Find teacher with validation
+      const teacher = await tx.user.findFirst({
+        where: { 
+          id: teacherId, 
+          role: Role.TEACHER, 
+          schoolId 
+        },
+        include: {
+          teacher: true
+        }
+      });
+
+      if (!teacher) {
+        throw new Error('Teacher not found in this school');
+      }
+
+      // 2. Delete teacher record first (due to foreign key constraint)
+      await tx.teacher.delete({
+        where: { 
+          userId: teacher.id 
+        }
+      });
+
+      // 3. Delete user record
+      await tx.user.delete({
+        where: { 
+          id: teacher.id 
+        }
+      });
+
+      return { message: 'Teacher deleted successfully' };
+    });
+  }
+
+
   async createClass(schoolId: string, name: string) {
     return await prisma.schoolClass.create({
       data: { name, schoolId }
