@@ -12,10 +12,36 @@ export const createStudentSchema = z.object({
   })
 });
 
+export const createTeacherSchema = z.object({
+  params: z.object({
+    schoolId: z.string().uuid('Invalid school ID')
+  }),
+  body: z.object({
+    name: z.string()
+      .min(2, 'Teacher name must be at least 2 characters')
+      .max(50, 'Teacher name cannot exceed 50 characters'),
+    email: z.string()
+      .email('Invalid email format')
+      .min(5, 'Email must be at least 5 characters')
+      .max(100, 'Email cannot exceed 100 characters'),
+    subjects: z.array(
+      z.string().uuid('Invalid subject ID')
+    ).optional()
+      .default([])
+  })
+});
+
 export const deleteStudentSchema = z.object({
   params: z.object({
     schoolId: z.string().uuid('Invalid school ID'),
     studentId: z.string().uuid('Invalid student ID')
+  })
+});
+
+export const deleteTeacherSchema = z.object({
+  params: z.object({
+    schoolId: z.string().uuid('Invalid school ID'),
+    teacherId: z.string().uuid('Invalid teacher ID')
   })
 });
 
