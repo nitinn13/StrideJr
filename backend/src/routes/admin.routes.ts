@@ -16,7 +16,9 @@ import {
   createSubstituteSchema,
   deleteSubstituteSchema,
   createTeacherSchema,
-  deleteTeacherSchema
+  deleteTeacherSchema,
+  createMultipleStudentsSchema, // Add this import
+  createMultipleTeachersSchema, // Add this import
 } from '../schemas/admin.schema'
 import { catchAsync } from '../middleware/errorhandling.middleware'
 
@@ -33,6 +35,17 @@ router.post(
     const studentData = req.body
     const student = await adminService.createStudent(schoolId, studentData)
     res.status(201).json(student)
+  })
+)
+
+router.post(
+  '/:schoolId/students/batch',
+  roleMiddleware.schoolAdmin,
+  validate(createMultipleStudentsSchema),
+  catchAsync(async (req: Request, res: Response, next: NextFunction) => {
+    const { schoolId } = req.params
+    const students = await adminService.createMultipleStudents(schoolId, req.body.students)
+    res.status(201).json(students)
   })
 )
 
@@ -174,6 +187,17 @@ router.post(
     const teacherData = req.body
     const teacher = await adminService.createTeacher(schoolId, teacherData)
     res.status(201).json(teacher)
+  })
+)
+
+router.post(
+  '/:schoolId/teachers/batch',
+  roleMiddleware.schoolAdmin,
+  validate(createMultipleTeachersSchema),
+  catchAsync(async (req: Request, res: Response, next: NextFunction) => {
+    const { schoolId } = req.params
+    const teachers = await adminService.createMultipleTeachers(schoolId, req.body.teachers)
+    res.status(201).json(teachers)
   })
 )
 
