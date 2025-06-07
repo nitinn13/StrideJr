@@ -75,3 +75,15 @@ export const deleteTeacher = catchAsync(async (req: Request, res: Response) => {
   await adminService.deleteTeacher(schoolId, teacherId);
   res.status(204).send();
 });
+
+export const createMultipleStudents = catchAsync(async (req: Request, res: Response) => {
+  const { schoolId } = req.params;
+  const students = await adminService.createMultipleStudents(schoolId, req.body.students);
+  res.status(201).json(students);
+});
+
+export const createMultipleTeachers = catchAsync(async (req: Request, res: Response) => {
+  const { schoolId } = req.params;
+  const teachers = await adminService.createMultipleTeachers(schoolId, req.body.teachers);
+  res.status(201).json(teachers);
+});
