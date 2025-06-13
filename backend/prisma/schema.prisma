@@ -3,8 +3,199 @@ generator client {
 }
 
 datasource db {
-  provider = "postgresql"
-  url      = env("DATABASE_URL")
+  provider  = "postgresql"
+  url       = env("DATABASE_URL")
+  directUrl = env("DIRECT_URL")
+}
+
+model User {
+  id        String   @id @default(uuid())
+  email     String   @unique
+  password  String
+  name      String
+  role      Role
+  schoolId  String?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  parent    Parent?
+  student   Student?
+  teacher   Teacher?
+  school    School?  @relation(fields: [schoolId], references: [id])
+}
+
+model School {
+  id            String         @id @default(uuid())
+  name          String
+  address       String
+  email         String         @unique
+  phone         String         @unique
+  website       String?
+  announcements Announcement[]
+  holidays      Holiday[]
+  classes       SchoolClass[]
+  users         User[]
+}
+
+model SchoolClass {
+  id       String    @id @default(uuid())
+  name     String
+  schoolId String
+  school   School    @relation(fields: [schoolId], references: [id])
+  sections Section[]
+  subjects Subject[]
+}
+
+model Section {
+  id        String      @id @default(uuid())
+  name      String
+  classId   String
+  schedules Schedule[]
+  class     SchoolClass @relation(fields: [classId], references: [id])
+  students  Student[]
+  tests     Test[]
+}
+
+model Subject {
+  id         String           @id @default(uuid())
+  name       String
+  classId    String
+  attendance Attendance[]
+  schedules  Schedule[]
+  class      SchoolClass      @relation(fields: [classId], references: [id])
+  teachers   TeacherSubject[]
+  tests      Test[]
+}
+
+model Teacher {
+  id        String              @id @default(uuid())
+  userId    String              @unique
+  schedules Schedule[]
+  requests  SubstituteRequest[] @relation("Requestor")
+  responses SubstituteRequest[] @relation("Responder")
+  user      User                @relation(fields: [userId], references: [id])
+  subjects  TeacherSubject[]
+  tests     Test[]
+}
+
+model TeacherSubject {
+  id        String  @id @default(uuid())
+  teacherId String
+  subjectId String
+  subject   Subject @relation(fields: [subjectId], references: [id])
+  teacher   Teacher @relation(fields: [teacherId], references: [id])
+}
+
+model Student {
+  id         String         @id @default(uuid())
+  userId     String         @unique
+  sectionId  String
+  parentId   String
+  attendance Attendance[]
+  fees       Fee[]
+  leaves     LeaveRequest[]
+  marks      Marks[]
+  parent     Parent         @relation(fields: [parentId], references: [id])
+  section    Section        @relation(fields: [sectionId], references: [id])
+  user       User           @relation(fields: [userId], references: [id])
+}
+
+model Parent {
+  id       String    @id @default(uuid())
+  userId   String    @unique
+  user     User      @relation(fields: [userId], references: [id])
+  students Student[]
+}
+
+model Attendance {
+  id        String           @id @default(uuid())
+  date      DateTime
+  studentId String
+  subjectId String
+  status    AttendanceStatus
+  student   Student          @relation(fields: [studentId], references: [id])
+  subject   Subject          @relation(fields: [subjectId], references: [id])
+}
+
+model Schedule {
+  id                String             @id @default(uuid())
+  day               String
+  time              String
+  subjectId         String
+  sectionId         String
+  teacherId         String
+  section           Section            @relation(fields: [sectionId], references: [id])
+  subject           Subject            @relation(fields: [subjectId], references: [id])
+  teacher           Teacher            @relation(fields: [teacherId], references: [id])
+  substituteRequest SubstituteRequest? @relation("ScheduleSubstitution")
+}
+
+model Test {
+  id        String   @id @default(uuid())
+  name      String
+  date      DateTime
+  subjectId String
+  sectionId String
+  teacherId String
+  marks     Marks[]
+  section   Section  @relation(fields: [sectionId], references: [id])
+  subject   Subject  @relation(fields: [subjectId], references: [id])
+  teacher   Teacher  @relation(fields: [teacherId], references: [id])
+}
+
+model Marks {
+  id        String  @id @default(uuid())
+  studentId String
+  testId    String
+  score     Float
+  student   Student @relation(fields: [studentId], references: [id])
+  test      Test    @relation(fields: [testId], references: [id])
+}
+
+model SubstituteRequest {
+  id          String        @id @default(uuid())
+  requestorId String
+  responderId String
+  scheduleId  String        @unique
+  status      RequestStatus
+  requestor   Teacher       @relation("Requestor", fields: [requestorId], references: [id])
+  responder   Teacher       @relation("Responder", fields: [responderId], references: [id])
+  schedule    Schedule      @relation("ScheduleSubstitution", fields: [scheduleId], references: [id])
+}
+
+model Announcement {
+  id        String   @id @default(uuid())
+  message   String
+  urgency   String
+  createdAt DateTime @default(now())
+  schoolId  String
+  school    School   @relation(fields: [schoolId], references: [id])
+}
+
+model Holiday {
+  id       String   @id @default(uuid())
+  title    String
+  date     DateTime
+  schoolId String
+  school   School   @relation(fields: [schoolId], references: [id])
+}
+
+model LeaveRequest {
+  id        String   @id @default(uuid())
+  reason    String
+  fromDate  DateTime
+  toDate    DateTime
+  studentId String
+  student   Student  @relation(fields: [studentId], references: [id])
+}
+
+model Fee {
+  id        String    @id @default(uuid())
+  studentId String
+  amount    Float
+  paid      Boolean
+  paidAt    DateTime?
+  dueDate   DateTime
+  student   Student   @relation(fields: [studentId], references: [id])
 }
 
 enum Role {
@@ -25,217 +216,4 @@ enum RequestStatus {
   PENDING
   ACCEPTED
   DECLINED
-}
-
-// ---------- User ----------
-model User {
-  id        String   @id @default(uuid())
-  email     String   @unique
-  password  String
-  name      String
-  role      Role
-  schoolId  String?
-  school    School?  @relation(fields: [schoolId], references: [id])
-  teacher   Teacher?
-  parent    Parent?
-  student   Student?
-
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-}
-
-// ---------- School ----------
-model School {
-  id       String   @id @default(uuid())
-  name     String
-  address  String
-  email   String @unique
-  phone    String @unique
-  website  String?
-
-  users    User[]
-  classes  SchoolClass[]
-  holidays Holiday[]
-  announcements Announcement[]
-
-}
-
-// ---------- Classes & Sections ----------
-model SchoolClass {
-  id        String    @id @default(uuid())
-  name      String
-  schoolId  String
-  school    School    @relation(fields: [schoolId], references: [id])
-  sections  Section[]
-  subjects  Subject[]
-}
-
-model Section {
-  id        String    @id @default(uuid())
-  name      String
-  classId   String
-  class     SchoolClass @relation(fields: [classId], references: [id])
-  students  Student[]
-  schedules Schedule[]
-  tests     Test[]
-}
-
-// ---------- Subjects ----------
-model Subject {
-  id         String    @id @default(uuid())
-  name       String
-  classId    String
-  class      SchoolClass @relation(fields: [classId], references: [id])
-  teachers   TeacherSubject[]
-  schedules  Schedule[]
-  tests      Test[]
-  attendance Attendance[]
-}
-
-// ---------- Teacher ----------
-model Teacher {
-  id         String    @id @default(uuid())
-  userId     String    @unique
-  user       User      @relation(fields: [userId], references: [id])
-  subjects   TeacherSubject[]
-  schedules  Schedule[]
-  requests   SubstituteRequest[] @relation("Requestor")
-  responses  SubstituteRequest[] @relation("Responder")
-  tests      Test[]
-}
-
-model TeacherSubject {
-  id         String   @id @default(uuid())
-  teacherId  String
-  subjectId  String
-  teacher    Teacher  @relation(fields: [teacherId], references: [id])
-  subject    Subject  @relation(fields: [subjectId], references: [id])
-}
-
-// ---------- Student & Parent ----------
-model Student {
-  id         String   @id @default(uuid())
-  userId     String   @unique
-  user       User     @relation(fields: [userId], references: [id])
-  sectionId  String
-  section    Section  @relation(fields: [sectionId], references: [id])
-  parentId   String
-  parent     Parent   @relation(fields: [parentId], references: [id])
-  attendance Attendance[]
-  marks      Marks[]
-  leaves     LeaveRequest[]
-  fees       Fee[]
-}
-
-model Parent {
-  id       String    @id @default(uuid())
-  userId   String    @unique
-  user     User      @relation(fields: [userId], references: [id])
-  students Student[]
-}
-
-// ---------- Attendance ----------
-model Attendance {
-  id         String           @id @default(uuid())
-  date       DateTime
-  studentId  String
-  subjectId  String
-  status     AttendanceStatus
-
-  student    Student          @relation(fields: [studentId], references: [id])
-  subject    Subject          @relation(fields: [subjectId], references: [id])
-}
-
-// ---------- Schedule ----------
-model Schedule {
-  id                  String              @id @default(uuid())
-  day                 String              // Mon, Tue, etc.
-  time                String              // 10:00 AM
-  subjectId           String
-  sectionId           String
-  teacherId           String
-
-  teacher             Teacher             @relation(fields: [teacherId], references: [id])
-  section             Section             @relation(fields: [sectionId], references: [id])
-  subject             Subject             @relation(fields: [subjectId], references: [id])
-  substituteRequest   SubstituteRequest?  @relation("ScheduleSubstitution")
-}
-
-// ---------- Tests & Marks ----------
-model Test {
-  id         String   @id @default(uuid())
-  name       String
-  date       DateTime
-  subjectId  String
-  sectionId  String
-  teacherId  String
-
-  subject    Subject  @relation(fields: [subjectId], references: [id])
-  section    Section  @relation(fields: [sectionId], references: [id])
-  teacher    Teacher  @relation(fields: [teacherId], references: [id])
-  marks      Marks[]
-}
-
-model Marks {
-  id         String   @id @default(uuid())
-  studentId  String
-  testId     String
-  score      Float
-
-  student    Student  @relation(fields: [studentId], references: [id])
-  test       Test     @relation(fields: [testId], references: [id])
-}
-
-// ---------- Substitution ----------
-model SubstituteRequest {
-  id            String          @id @default(uuid())
-  requestorId   String
-  responderId   String
-  scheduleId    String          @unique
-  status        RequestStatus
-
-  requestor     Teacher         @relation("Requestor", fields: [requestorId], references: [id])
-  responder     Teacher         @relation("Responder", fields: [responderId], references: [id])
-  schedule      Schedule        @relation("ScheduleSubstitution", fields: [scheduleId], references: [id])
-}
-
-// ---------- Announcements ----------
-model Announcement {
-  id        String   @id @default(uuid())
-  message   String
-  urgency   String
-  createdAt DateTime @default(now())
-  schoolId  String
-  school    School   @relation(fields: [schoolId], references: [id])
-}
-
-// ---------- Calendar / Holidays ----------
-model Holiday {
-  id        String   @id @default(uuid())
-  title     String
-  date      DateTime
-  schoolId  String
-  school    School   @relation(fields: [schoolId], references: [id])
-}
-
-// ---------- Leave Requests ----------
-model LeaveRequest {
-  id         String   @id @default(uuid())
-  reason     String
-  fromDate   DateTime
-  toDate     DateTime
-  studentId  String
-  student    Student  @relation(fields: [studentId], references: [id])
-}
-
-// ---------- Fees ----------
-model Fee {
-  id         String   @id @default(uuid())
-  studentId  String
-  amount     Float
-  paid       Boolean
-  paidAt     DateTime?
-  dueDate    DateTime
-
-  student    Student  @relation(fields: [studentId], references: [id])
 }
