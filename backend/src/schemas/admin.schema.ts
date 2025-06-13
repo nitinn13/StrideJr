@@ -12,10 +12,76 @@ export const createStudentSchema = z.object({
   })
 });
 
+export const createMultipleStudentsSchema = z.object({
+  params: z.object({
+    schoolId: z.string().uuid('Invalid school ID')
+  }),
+  body: z.object({
+    students: z.array(
+      z.object({
+        name: z.string().min(1, 'Student name is required'),
+        email: z.string().email('Invalid email format'),
+        sectionId: z.string().uuid('Invalid section ID').optional()
+      })
+    ).min(1, 'At least one student is required')
+  })
+});
+
+
+export const createTeacherSchema = z.object({
+  params: z.object({
+    schoolId: z.string().uuid('Invalid school ID')
+  }),
+  body: z.object({
+    name: z.string()
+      .min(2, 'Teacher name must be at least 2 characters')
+      .max(50, 'Teacher name cannot exceed 50 characters'),
+    email: z.string()
+      .email('Invalid email format')
+      .min(5, 'Email must be at least 5 characters')
+      .max(100, 'Email cannot exceed 100 characters'),
+    subjects: z.array(
+      z.string().uuid('Invalid subject ID')
+    ).optional()
+      .default([])
+  })
+});
+
+export const createMultipleTeachersSchema = z.object({
+  params: z.object({
+    schoolId: z.string().uuid('Invalid school ID')
+  }),
+  body: z.object({
+    teachers: z.array(
+      z.object({
+        name: z.string()
+          .min(2, 'Teacher name must be at least 2 characters')
+          .max(50, 'Teacher name cannot exceed 50 characters'),
+        email: z.string()
+          .email('Invalid email format')
+          .min(5, 'Email must be at least 5 characters')
+          .max(100, 'Email cannot exceed 100 characters'),
+        subjects: z.array(
+          z.string().uuid('Invalid subject ID')
+        ).optional()
+          .default([])
+      })
+    ).min(1, 'At least one teacher is required')
+  })
+});
+
+
 export const deleteStudentSchema = z.object({
   params: z.object({
     schoolId: z.string().uuid('Invalid school ID'),
     studentId: z.string().uuid('Invalid student ID')
+  })
+});
+
+export const deleteTeacherSchema = z.object({
+  params: z.object({
+    schoolId: z.string().uuid('Invalid school ID'),
+    teacherId: z.string().uuid('Invalid teacher ID')
   })
 });
 
