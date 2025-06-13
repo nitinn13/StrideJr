@@ -12,11 +12,9 @@ dotenv.config()
 const app = express()
 const prisma = new PrismaClient()
 
-// Middleware
 app.use(express.json())
 app.use(express.urlencoded({ extended: true }))
 
-// Public Routes
 app.use('/auth', authRoutes)
 
 // Protected Routes

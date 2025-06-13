@@ -38,7 +38,7 @@ export class SuperAdminService {
     name: string
   }) {
     const hashedPassword = await hashPassword(data.password)
-    
+
     return prisma.user.create({
       data: {
         ...data,
@@ -81,21 +81,23 @@ export class SuperAdminService {
     endDate?: Date
     schoolId?: string
   }) {
-    const stats = await prisma.$transaction([
-      prisma.school.count(),
-      prisma.user.count(),
-      prisma.user.groupBy({
-          by: ['role'],
-          _count: true,
-          orderBy: undefined
-      })
-    ])
+    const schoolsWithUsers = await prisma.school.findMany({
+      include: {
+        users: {
+          select: {
+            id: true,
+            name: true,
+            email: true,
+            role: true,
+            schoolId: true
+          }
+        }
+      }
+    });
 
     return {
-      totalSchools: stats[0],
-      totalUsers: stats[1],
-      usersByRole: stats[2]
-    }
+      allSchools: schoolsWithUsers
+    };
   }
 
   async getSchoolStats(schoolId: string) {
@@ -114,7 +116,7 @@ export class SuperAdminService {
 
   async getSystemHealth() {
     const dbStatus = await prisma.$queryRaw`SELECT 1`
-    
+
     return {
       status: 'healthy',
       timestamp: new Date(),
