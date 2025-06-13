@@ -81,38 +81,38 @@ export class SuperAdminService {
     endDate?: Date
     schoolId?: string
   }) {
-    const schoolsWithUsers = await prisma.school.findMany({
-      include: {
-        users: {
-          select: {
-            id: true,
-            name: true,
-            email: true,
-            role: true,
-            schoolId: true
-          }
-        }
-      }
-    });
+    const schools = await prisma.school.findMany();
 
     return {
-      allSchools: schoolsWithUsers
+      Schools: schools
     };
   }
 
   async getSchoolStats(schoolId: string) {
-    const [users, students, teachers] = await prisma.$transaction([
-      prisma.user.count({ where: { schoolId } }),
-      prisma.student.count({ where: { user: { schoolId } } }),
-      prisma.teacher.count({ where: { user: { schoolId } } })
-    ])
-
-    return {
-      totalUsers: users,
-      totalStudents: students,
-      totalTeachers: teachers
+  const users = await prisma.user.findMany({
+    where: { schoolId },
+    select: {
+      email: true,
+      name: true,
+      role: true,
+      createdAt: true,
     }
-  }
+  });
+
+  // Categorize users by role
+  const categorizedUsers = users.reduce((acc, user) => {
+    if (!acc[user.role]) {
+      acc[user.role] = [];
+    }
+    acc[user.role].push(user);
+    return acc;
+  }, {} as Record<string, typeof users>);
+
+  return {
+    totalUsers: users.length,
+    usersByRole: categorizedUsers
+  };
+}
 
   async getSystemHealth() {
     const dbStatus = await prisma.$queryRaw`SELECT 1`
