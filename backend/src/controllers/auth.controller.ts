@@ -18,3 +18,12 @@ export async function login(req: Request, res: Response, next: NextFunction) {
     next(err)
   }
 }
+
+export async function profile(req: Request, res: Response, next: NextFunction) {
+  try {
+    const result = await authService.getUserProfile(req.user.userId)
+    res.json(result)
+  } catch (err) {
+    next(err)
+  }
+}

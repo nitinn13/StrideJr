@@ -25,7 +25,6 @@ const router = Router()
 // Apply superadmin role check to all routes
 router.use(roleMiddleware.superadminOnly)
 
-// School Management Routes
 router.post(
   '/schools', 
   validate(createSchoolSchema), 

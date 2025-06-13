@@ -37,6 +37,15 @@ router.post(
     res.status(201).json(student)
   })
 )
+router.get(
+  '/:schoolId/students',
+  roleMiddleware.schoolAdmin,
+  catchAsync(async (req: Request, res: Response, next: NextFunction) => {
+    const { schoolId } = req.params
+    const students = await adminService.getStudentsWithCount(schoolId)
+    res.status(200).json(students)
+  })
+)
 
 router.post(
   '/:schoolId/students/batch',
@@ -81,6 +90,17 @@ router.delete(
     const { schoolId, classId } = req.params
     await adminService.deleteClass(schoolId, classId)
     res.status(204).send()
+  })
+)
+router.get(
+  '/:schoolId/classes',
+  roleMiddleware.schoolAdmin,
+  catchAsync(async (req: Request, res: Response, next: NextFunction) => {
+    const { schoolId } = req.params
+    const classes = await adminService.getClasses(schoolId)
+    res.status(200).json({
+      classes : classes
+    })
   })
 )
 
@@ -209,6 +229,15 @@ router.delete(
     const { schoolId, teacherId } = req.params
     await adminService.deleteTeacher(schoolId, teacherId)
     res.status(204).send()
+  })
+)
+router.get(
+  '/:schoolId/teachers',
+  roleMiddleware.schoolAdmin,
+  catchAsync(async (req: Request, res: Response, next: NextFunction) => {
+    const { schoolId } = req.params
+    const teachers = await adminService.getTeachersWithCount(schoolId)
+    res.status(200).json(teachers)
   })
 )
 

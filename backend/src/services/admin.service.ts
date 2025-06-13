@@ -142,6 +142,103 @@ export class AdminService {
 
     await prisma.user.delete({ where: { id: student.userId } });
   }
+  
+
+ async getStudentsWithCount(schoolId: string) {
+  const [students, total] = await Promise.all([
+    prisma.student.findMany({
+      where: {
+        section: {
+          class: {
+            schoolId: schoolId
+          }
+        }
+      },
+      include: {
+        user: {
+          select: {
+            id: true,
+            name: true,
+            email: true,
+            role: true,
+            createdAt: true
+          }
+        },
+        section: {
+          include: {
+            class: {
+              select: {
+                id: true,
+                name: true
+              }
+            }
+          }
+        },
+        parent: {
+          include: {
+            user: {
+              select: {
+                id: true,
+                name: true,
+                email: true
+              }
+            }
+          }
+        }
+      },
+      orderBy: {
+        user: {
+          name: 'asc'
+        }
+      }
+    }),
+    prisma.student.count({
+      where: {
+        section: {
+          class: {
+            schoolId: schoolId
+          }
+        }
+      }
+    })
+  ]);
+
+  const formattedStudents = students.map(student => ({
+    id: student.id,
+    user: {
+      id: student.user.id,
+      name: student.user.name,
+      email: student.user.email,
+      role: student.user.role,
+      joinedAt: student.user.createdAt
+    },
+    academicInfo: {
+      class: {
+        id: student.section.class.id,
+        name: student.section.class.name
+      },
+      section: {
+        id: student.section.id,
+        name: student.section.name
+      }
+    },
+    parent: student.parent ? {
+      id: student.parent.id,
+      name: student.parent.user.name,
+      email: student.parent.user.email
+    } : null
+  }));
+
+  return {
+    data: formattedStudents,
+    meta: {
+      total,
+      schoolId,
+      retrieved: formattedStudents.length,
+      lastUpdated: new Date().toISOString()
+    }
+  };
+}
 
   async createTeacher(schoolId: string, data: { name: string; email: string }) {
     const { name, email } = data;
@@ -267,6 +364,78 @@ export class AdminService {
       return { message: 'Teacher deleted successfully' };
     });
   }
+  async getTeachersWithCount(schoolId: string) {
+  const [teachers, total] = await Promise.all([
+    prisma.teacher.findMany({
+      where: {
+        user: {
+          schoolId: schoolId
+        }
+      },
+      include: {
+        user: {
+          select: {
+            id: true,
+            name: true,
+            email: true,
+            role: true,
+            createdAt: true
+          }
+        },
+        subjects: {
+          include: {
+            subject: {
+              select: {
+                id: true,
+                name: true
+              }
+            }
+          }
+        }
+      },
+      orderBy: {
+        user: {
+          name: 'asc'
+        }
+      }
+    }),
+    prisma.teacher.count({
+      where: {
+        user: {
+          schoolId: schoolId
+        }
+      }
+    })
+  ]);
+
+  const formattedTeachers = teachers.map(teacher => ({
+    id: teacher.id,
+    user: {
+      id: teacher.user.id,
+      name: teacher.user.name,
+      email: teacher.user.email,
+      role: teacher.user.role,
+      joinedAt: teacher.user.createdAt
+    },
+    subjects: teacher.subjects.map(subject => ({
+      id: subject.subject.id,
+      name: subject.subject.name
+    })),
+    meta: {
+      subjectCount: teacher.subjects.length
+    }
+  }));
+
+  return {
+    data: formattedTeachers,
+    meta: {
+      total,
+      schoolId,
+      retrieved: formattedTeachers.length,
+      lastUpdated: new Date().toISOString()
+    }
+  };
+}
 
 
   async createClass(schoolId: string, name: string) {
@@ -284,6 +453,20 @@ export class AdminService {
 
     await prisma.schoolClass.delete({ where: { id: classId } });
   }
+  async getClasses(schoolId: string) {
+  const classes = await prisma.schoolClass.findMany({
+    where: { schoolId },
+    include: {
+      sections: {
+        include: {
+          students: true  
+        }
+      },
+      subjects: true
+    }
+  });
+  return classes;
+}
 
   async createSection(schoolId: string, data: { name: string; classId: string }) {
     const { name, classId } = data;
